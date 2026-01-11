@@ -2,7 +2,7 @@
 
 A free, interactive calculator to help families estimate their total annual childcare costs — including school tuition, extended programs, summer care, and backup care for school closure days.
 
-**[➡️ Try the Calculator](https://YOUR-USERNAME.github.io/childcare-calculator/)** *(update this link after deploying)*
+**[➡️ Try the Calculator](https:///atifadam1234444.github.io/childcare-calculator/)** *(update this link after deploying)*
 
 ---
 
