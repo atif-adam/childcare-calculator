@@ -284,6 +284,7 @@
             width: 100%;
             text-align: center;
             padding: 8px;
+            font-size: 16px; /* Prevents iOS zoom on focus */
         }
         .nanny-month.summer-program input {
             background: #dbeafe;
@@ -296,6 +297,240 @@
         .nanny-month.disabled input {
             background: #f1f5f9;
             color: #94a3b8;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+            }
+            
+            h1 {
+                font-size: 22px;
+            }
+            
+            .subtitle {
+                font-size: 14px;
+            }
+            
+            /* Preset loader */
+            .preset-loader {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .preset-loader span {
+                text-align: center;
+            }
+            
+            .room-dropdown {
+                width: 100%;
+                min-width: unset;
+            }
+            
+            .preset-btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            /* Info banner */
+            .info-banner {
+                font-size: 13px;
+                padding: 12px 14px;
+            }
+            
+            /* Control panel */
+            .control-panel {
+                padding: 16px;
+            }
+            
+            .control-title {
+                font-size: 16px;
+            }
+            
+            .control-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            /* Tabs */
+            .tabs {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            
+            .tab {
+                flex: 1 1 auto;
+                text-align: center;
+                padding: 8px 12px;
+                font-size: 13px;
+            }
+            
+            /* Input groups */
+            .input-group {
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            
+            .input-group label {
+                min-width: 100%;
+                margin-bottom: 2px;
+            }
+            
+            select, input[type="number"], input[type="text"] {
+                font-size: 16px; /* Prevents iOS zoom */
+                padding: 10px 12px;
+            }
+            
+            /* Nanny grid - 3 columns on tablet, 2 on phone */
+            .nanny-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .nanny-month input {
+                padding: 10px 4px;
+            }
+            
+            /* Program selectors */
+            .program-selectors-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .program-selector {
+                padding: 16px;
+            }
+            
+            .program-selector select {
+                width: 100%;
+            }
+            
+            /* Summary card */
+            .summary-card {
+                padding: 20px;
+                border-radius: 16px;
+            }
+            
+            .summary-total {
+                font-size: 36px;
+            }
+            
+            .summary-sub {
+                font-size: 16px;
+            }
+            
+            .summary-breakdown {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .breakdown-item .value {
+                font-size: 18px;
+            }
+            
+            .breakdown-item .label {
+                font-size: 10px;
+            }
+            
+            /* Charts */
+            .chart-container {
+                padding: 16px;
+            }
+            
+            .chart-title {
+                font-size: 16px;
+            }
+            
+            .chart-note {
+                font-size: 12px;
+            }
+            
+            /* Table */
+            .table-container {
+                padding: 12px;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 8px 4px;
+            }
+            
+            /* Insights */
+            .insights {
+                padding: 16px;
+            }
+            
+            .insights-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            
+            .insight h4 {
+                font-size: 14px;
+            }
+            
+            .insight p {
+                font-size: 13px;
+            }
+            
+            /* Export button */
+            .export-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 14px 20px;
+            }
+        }
+        
+        /* Extra small screens */
+        @media (max-width: 480px) {
+            body {
+                padding: 8px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            /* Nanny grid - 2 columns on small phones */
+            .nanny-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            
+            /* Summary breakdown - stack on very small screens */
+            .summary-breakdown {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .summary-total {
+                font-size: 32px;
+            }
+            
+            /* Table horizontal scroll */
+            .table-container {
+                padding: 8px;
+            }
+            
+            table {
+                font-size: 11px;
+                min-width: 500px;
+            }
+            
+            th, td {
+                padding: 6px 3px;
+                white-space: nowrap;
+            }
+            
+            /* School name input */
+            .school-name-input {
+                font-size: 16px;
+                padding: 10px 12px;
+            }
         }
         
         /* Summary Card */
@@ -364,8 +599,14 @@
             margin-bottom: 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
             overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 14px;
+            min-width: 500px; /* Ensures table doesn't squish too much */
+        }
         th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
         th { background: #f8fafc; font-weight: 600; }
         th:first-child, td:first-child { text-align: left; }
