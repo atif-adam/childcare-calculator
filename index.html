@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Childcare Cost Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #1e293b;
+            line-height: 1.6;
+            padding: 24px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .subtitle { color: #64748b; margin-bottom: 24px; }
+        
+        /* Info Banner */
+        .info-banner {
+            background: linear-gradient(135deg, #dbeafe, #ede9fe);
+            border: 1px solid #c7d2fe;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: #4338ca;
+        }
+        .info-banner strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+        
+        /* Preset Loader */
+        .preset-loader {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .preset-loader span {
+            font-weight: 600;
+            color: #64748b;
+        }
+        .preset-btn {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+            border: none;
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(245,158,11,0.3);
+        }
+        .preset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+        }
+        .room-dropdown {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            background: white;
+            min-width: 240px;
+            cursor: pointer;
+        }
+        .room-dropdown:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        .room-selector {
+            padding: 10px 14px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            background: white;
+            cursor: pointer;
+            min-width: 220px;
+        }
+        .room-selector:focus {
+            outline: none;
+            border-color: #f59e0b;
+        }
+        
+        /* Control Panel */
+        .control-panel {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .control-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+        .control-section h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .help-icon {
+            width: 16px;
+            height: 16px;
+            background: #cbd5e1;
+            color: white;
+            border-radius: 50%;
+            font-size: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: help;
+            font-weight: bold;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #94a3b8;
+            font-weight: normal;
+            margin-bottom: 12px;
+            text-transform: none;
+            letter-spacing: normal;
+        }
+        select, input[type="number"], input[type="text"] {
+            padding: 10px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 15px;
+            background: white;
+            min-width: 120px;
+        }
+        select:focus, input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .input-group label {
+            min-width: 140px;
+            font-size: 14px;
+        }
+        .input-prefix {
+            color: #64748b;
+            font-size: 14px;
+        }
+        .school-name-input {
+            font-size: 18px;
+            font-weight: 500;
+            padding: 12px 16px;
+            width: 100%;
+            max-width: 400px;
+            margin-bottom: 16px;
+        }
+        
+        /* Program Selectors */
+        .program-selector {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            padding: 20px;
+            border-radius: 12px;
+            color: white;
+            margin-bottom: 16px;
+        }
+        .program-selector label {
+            display: block;
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .program-selector select {
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 14px;
+            min-width: 180px;
+        }
+        .program-selectors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .program-selector.secondary {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+        }
+        .program-selector.tertiary {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        /* Toggle Switch */
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 26px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: 0.3s;
+            border-radius: 26px;
+        }
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #3b82f6;
+        }
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(24px);
+        }
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        /* Nanny Days Editor */
+        .nanny-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .nanny-month {
+            text-align: center;
+        }
+        .nanny-month label {
+            font-size: 12px;
+            color: #64748b;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .nanny-month input {
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+        }
+        .nanny-month.summer-program input {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+        .nanny-month.summer-program label {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        .nanny-month.disabled input {
+            background: #f1f5f9;
+            color: #94a3b8;
+        }
+        
+        /* Summary Card */
+        .summary-card {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-radius: 20px;
+            padding: 32px;
+            color: white;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 40px rgba(59,130,246,0.3);
+        }
+        .summary-card h2 {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+        .summary-total {
+            font-size: 48px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .summary-sub {
+            font-size: 18px;
+            opacity: 0.85;
+        }
+        .summary-breakdown {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 16px;
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        .breakdown-item {
+            text-align: center;
+        }
+        .breakdown-item .label {
+            font-size: 11px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .breakdown-item .value {
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+        
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .chart-title { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+        .chart-note { text-align: center; color: #64748b; font-size: 14px; margin-top: 12px; }
+        canvas { max-height: 300px; }
+        
+        /* Table */
+        .table-container {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 12px; text-align: right; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; font-weight: 600; }
+        th:first-child, td:first-child { text-align: left; }
+        tr:hover { background: #f8fafc; }
+        .total-row { font-weight: 700; background: #f1f5f9; }
+        .summer-row { background: #eff6ff; }
+        .summer-badge {
+            background: #3b82f6;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+            font-weight: 600;
+        }
+        
+        /* Insights */
+        .insights {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 24px;
+        }
+        .insights-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 16px;
+        }
+        .insight { border-left: 4px solid; padding-left: 16px; }
+        .insight-blue { border-color: #3b82f6; }
+        .insight-green { border-color: #10b981; }
+        .insight-red { border-color: #ef4444; }
+        .insight-amber { border-color: #f59e0b; }
+        .insight h4 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+        .insight p { font-size: 14px; color: #64748b; }
+        .highlight-blue { color: #3b82f6; font-weight: 600; }
+        .highlight-green { color: #10b981; font-weight: 600; }
+        .highlight-red { color: #ef4444; font-weight: 600; }
+        .highlight-amber { color: #f59e0b; font-weight: 600; }
+        
+        .footer { text-align: center; color: #94a3b8; font-size: 13px; margin-top: 32px; }
+        .footer a { color: #64748b; }
+        
+        /* Print/Export Button */
+        .export-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 auto 24px;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(16,185,129,0.4);
+        }
+        .export-btn::before {
+            content: "🖨️";
+        }
+        
+        .reset-btn {
+            background: #64748b;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 12px;
+        }
+        .reset-btn:hover { background: #475569; }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 16px;
+            border: none;
+            background: #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        .print-header, .print-config {
+            display: none;
+        }
+        .screen-only {
+            /* Visible on screen, hidden in print */
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                font-size: 12px;
+            }
+            .container {
+                max-width: 100%;
+            }
+            .control-panel, .tabs, .tab-content, .reset-btn, .export-btn, .info-banner, .screen-only, .preset-loader {
+                display: none !important;
+            }
+            .summary-card {
+                background: #3b82f6 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            .summary-total {
+                font-size: 36px;
+            }
+            .chart-container {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+                padding: 16px;
+                margin-bottom: 16px;
+            }
+            canvas {
+                max-height: 200px !important;
+            }
+            .table-container {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+            .insights {
+                page-break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #e2e8f0;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 16px;
+                padding-bottom: 16px;
+                border-bottom: 2px solid #3b82f6;
+            }
+            .print-header h1 {
+                font-size: 24px;
+                margin-bottom: 4px;
+            }
+            .print-header p {
+                color: #64748b;
+                font-size: 14px;
+            }
+            .print-config {
+                display: block !important;
+                background: #f8fafc;
+                padding: 12px 16px;
+                border-radius: 8px;
+                margin-bottom: 16px;
+                font-size: 13px;
+            }
+            .print-config strong {
+                color: #3b82f6;
+            }
+            .footer {
+                margin-top: 16px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Print-only header -->
+        <div class="print-header">
+            <h1 id="printTitle">🧒 Childcare Cost Analysis</h1>
+            <p id="printSubtitle">Annual Cost Breakdown</p>
+        </div>
+        
+        <!-- Print-only configuration summary -->
+        <div class="print-config" id="printConfig">
+            Configuration will appear here when printing
+        </div>
+
+        <h1 class="screen-only">🧒 Childcare Cost Calculator</h1>
+        <p class="subtitle screen-only">Calculate your total annual childcare costs including school tuition and backup care</p>
+
+        <!-- Info Banner -->
+        <div class="info-banner">
+            <strong>How to use this calculator:</strong>
+            1) Enter your school's name and tuition rates in "School & Rates" tab → 
+            2) Select your program options (Extended Day, Life Project days) → 
+            3) Adjust nanny/backup care settings in "Backup Care" tab → 
+            4) Review your total costs and print/save when ready!
+        </div>
+
+        <!-- Preset Loader -->
+        <div class="preset-loader">
+            <span>Quick Start — Eliot-Pearson Children's School:</span>
+            <select id="epcsRoom" class="room-dropdown">
+                <option value="">Select your child's room...</option>
+                <option value="rainbow">🌈 Rainbow Room (ages 2y 9m – 3y)</option>
+                <option value="purple">💜 Purple Room (ages 3 – 4)</option>
+                <option value="green">💚 Green Room (ages 4 – 5)</option>
+                <option value="orange">🧡 Orange Room (ages 5 – 6)</option>
+            </select>
+            <button class="preset-btn" onclick="loadEPCS()">Load Rates & Calendar</button>
+        </div>
+
+        <!-- Export Button -->
+        <button class="export-btn" onclick="exportPDF()">Print / Save as PDF</button>
+
+        <!-- Control Panel -->
+        <div class="control-panel">
+            <div class="control-title">⚙️ Configure Your Childcare Plan</div>
+            
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('school')">School & Rates</button>
+                <button class="tab" onclick="showTab('programs')">Programs</button>
+                <button class="tab" onclick="showTab('summer')">Summer Program</button>
+                <button class="tab" onclick="showTab('nanny')">Backup Care</button>
+            </div>
+            
+            <!-- School & Rates Tab -->
+            <div id="tab-school" class="tab-content active">
+                <div class="control-section">
+                    <h3>Your School</h3>
+                    <input type="text" id="schoolName" class="school-name-input" placeholder="Enter school name (e.g., Bright Horizons)" value="" onchange="updateAll()">
+                </div>
+                
+                <div class="control-grid">
+                    <div class="control-section">
+                        <h3>Base Tuition (Annual) <span class="help-icon" title="The base annual cost for your child's classroom/program">?</span></h3>
+                        <p class="help-text">Enter your school's annual tuition for the base program (typically half-day or core hours)</p>
+                        <div class="input-group">
+                            <label>Regular Program:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-regular" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>Other Add-ons:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-addons" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <p class="help-text" style="margin-top: -4px;">E.g., Enrichment Program, special classes</p>
+                        <div class="input-group">
+                            <label>School Year Months:</label>
+                            <input type="number" id="schoolMonths" value="10" min="1" max="12" onchange="updateAll()">
+                            <span class="input-prefix">months</span>
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Extended Day Rates (Annual) <span class="help-icon" title="Additional hours beyond base program, typically afternoon care">?</span></h3>
+                        <p class="help-text">Extended day adds afternoon hours. Enter annual cost for each option your school offers.</p>
+                        <div class="input-group">
+                            <label>5 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-extended5" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>4 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-extended4" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>3 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-extended3" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>2 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-extended2" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Late Afternoon Rates (Annual) <span class="help-icon" title="Additional late afternoon coverage, sometimes called 'Life Project' or 'Extended Extended Day'">?</span></h3>
+                        <p class="help-text">Some schools offer additional late afternoon hours (e.g., 4-5:30pm). Enter $0 if not applicable.</p>
+                        <div class="input-group">
+                            <label>5 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-life5" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>4 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-life4" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>3 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-life3" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                        <div class="input-group">
+                            <label>2 Days/week:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="rate-life2" value="0" step="0.01" onchange="updateAll()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Programs Tab -->
+            <div id="tab-programs" class="tab-content">
+                <h3 style="margin-bottom: 16px; color: #64748b;">SELECT YOUR PROGRAM OPTIONS</h3>
+                <p class="help-text" style="margin-bottom: 20px;">Choose how many days per week you need for each program type.</p>
+                
+                <div class="program-selectors-grid">
+                    <div class="program-selector">
+                        <label>Extended Day</label>
+                        <select id="extendedDays" onchange="updateAll()">
+                            <option value="5" selected>5 Days / Week</option>
+                            <option value="4">4 Days / Week</option>
+                            <option value="3">3 Days / Week</option>
+                            <option value="2">2 Days / Week</option>
+                            <option value="0">None</option>
+                        </select>
+                    </div>
+                    
+                    <div class="program-selector secondary">
+                        <label>Late Afternoon Program</label>
+                        <select id="lifeProjectDays" onchange="updateAll()">
+                            <option value="5">5 Days / Week</option>
+                            <option value="4">4 Days / Week</option>
+                            <option value="3">3 Days / Week</option>
+                            <option value="2">2 Days / Week</option>
+                            <option value="0" selected>None</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Summer Program Tab -->
+            <div id="tab-summer" class="tab-content">
+                <div class="control-section">
+                    <h3>Summer Program Options</h3>
+                    <p class="help-text">Configure if your school offers a summer program and which months it covers.</p>
+                    
+                    <div class="toggle-row">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="summerEnabled" onchange="updateAll()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="toggle-label">School offers a Summer Program</span>
+                    </div>
+                    
+                    <div id="summerOptions" style="display: none;">
+                        <div class="input-group">
+                            <label>Summer months:</label>
+                            <select id="summerMonths" onchange="updateAll()">
+                                <option value="jul">July only</option>
+                                <option value="aug">August only</option>
+                                <option value="jul-aug">July & August</option>
+                                <option value="jun-jul">June & July</option>
+                                <option value="jun-aug">June, July & August</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Summer monthly rate:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="summerRate" value="0" step="0.01" onchange="updateAll()">
+                            <span class="input-prefix">/month</span>
+                        </div>
+                        <p class="help-text">Leave at $0 to use the same monthly rate as the school year.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Backup Care / Nanny Tab -->
+            <div id="tab-nanny" class="tab-content">
+                <div class="control-grid">
+                    <div class="control-section">
+                        <h3>Backup Care Settings <span class="help-icon" title="Nanny or babysitter costs for school closure days">?</span></h3>
+                        <p class="help-text">Enter your nanny/babysitter rate for days when school is closed.</p>
+                        <div class="input-group">
+                            <label>Hourly Rate:</label>
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="nannyRate" value="25" min="0" step="1" onchange="updateAll()">
+                            <span class="input-prefix">/hr</span>
+                        </div>
+                        <div class="input-group">
+                            <label>Hours per Day:</label>
+                            <input type="number" id="nannyHours" value="8" min="1" max="12" step="0.5" onchange="updateAll()">
+                            <span class="input-prefix">hrs</span>
+                        </div>
+                        <p style="font-size: 14px; color: #64748b; margin-top: 8px;">
+                            Daily backup care cost: <strong id="dailyNannyCost">$200</strong>
+                        </p>
+                    </div>
+                    
+                    <div class="control-section">
+                        <h3>Closure Days by Month <span class="help-icon" title="Number of weekdays you need backup care each month">?</span></h3>
+                        <p class="help-text">Enter the number of school closure days requiring backup care. Check your school calendar!</p>
+                        <div class="nanny-grid" id="nannyGrid">
+                            <!-- Generated by JS -->
+                        </div>
+                        <button class="reset-btn" onclick="resetNannyDays()">Reset to Zeros</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary Card -->
+        <div class="summary-card">
+            <h2 id="summarySchoolName">Total Annual Childcare Cost</h2>
+            <div class="summary-total" id="summaryTotal">$0</div>
+            <div class="summary-sub" id="summarySub">$0/month average</div>
+            <div class="summary-breakdown">
+                <div class="breakdown-item">
+                    <div class="label">Base Tuition</div>
+                    <div class="value" id="breakdownTuition">$0</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="label">Add-ons</div>
+                    <div class="value" id="breakdownAddons">$0</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="label">Extended Day</div>
+                    <div class="value" id="breakdownExtended">$0</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="label">Late Afternoon</div>
+                    <div class="value" id="breakdownLife">$0</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="label">Summer</div>
+                    <div class="value" id="breakdownSummer">$0</div>
+                </div>
+                <div class="breakdown-item">
+                    <div class="label">Backup Care</div>
+                    <div class="value" id="breakdownNanny">$0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="chart-container">
+            <div class="chart-title">Monthly Total Cost</div>
+            <canvas id="monthlyChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Cost Composition: Tuition vs Backup Care</div>
+            <canvas id="compositionChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Cumulative Spend Over 12 Months</div>
+            <canvas id="cumulativeChart"></canvas>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+            <div class="chart-title">Monthly Breakdown</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>Type</th>
+                        <th>Tuition</th>
+                        <th>Backup Days</th>
+                        <th>Backup Cost</th>
+                        <th>Monthly Total</th>
+                        <th>Cumulative</th>
+                    </tr>
+                </thead>
+                <tbody id="dataTable"></tbody>
+            </table>
+        </div>
+
+        <!-- Key Insights -->
+        <div class="insights">
+            <div class="chart-title">Key Insights</div>
+            <div class="insights-grid">
+                <div class="insight insight-blue">
+                    <h4>Monthly Average</h4>
+                    <p id="insight-average">Calculating...</p>
+                </div>
+                <div class="insight insight-green">
+                    <h4>School vs Backup Split</h4>
+                    <p id="insight-split">Calculating...</p>
+                </div>
+                <div class="insight insight-red">
+                    <h4>Backup Care Burden</h4>
+                    <p id="insight-nanny">Calculating...</p>
+                </div>
+                <div class="insight insight-amber">
+                    <h4>Peak Month</h4>
+                    <p id="insight-peak">Finding peak...</p>
+                </div>
+            </div>
+        </div>
+
+        <p class="footer">
+            Childcare Cost Calculator | 
+            <a href="https://github.com" target="_blank">View on GitHub</a> | 
+            Made for busy parents 💙
+        </p>
+    </div>
+
+    <script>
+        // Chart instances
+        let monthlyChart, compositionChart, cumulativeChart;
+        
+        const months = ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'];
+        const monthIds = ['sep', 'oct', 'nov', 'dec', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug'];
+        
+        // Initialize nanny days grid
+        function initNannyGrid() {
+            const grid = document.getElementById('nannyGrid');
+            grid.innerHTML = '';
+            monthIds.forEach((id, i) => {
+                const div = document.createElement('div');
+                div.className = 'nanny-month';
+                div.id = `nanny-container-${id}`;
+                div.innerHTML = `
+                    <label>${months[i]}</label>
+                    <input type="number" id="nanny-${id}" value="0" min="0" max="23" onchange="updateAll()">
+                `;
+                grid.appendChild(div);
+            });
+        }
+        
+        function showTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            
+            // Show/hide summer options
+            if (tabName === 'summer') {
+                document.getElementById('summerOptions').style.display = 
+                    document.getElementById('summerEnabled').checked ? 'block' : 'none';
+            }
+        }
+        
+        // Toggle summer options visibility
+        document.getElementById('summerEnabled').addEventListener('change', function() {
+            document.getElementById('summerOptions').style.display = this.checked ? 'block' : 'none';
+            updateNannyGridForSummer();
+            updateAll();
+        });
+        
+        function updateNannyGridForSummer() {
+            const summerEnabled = document.getElementById('summerEnabled').checked;
+            const summerMonths = document.getElementById('summerMonths').value;
+            
+            // Reset all to normal
+            monthIds.forEach(id => {
+                const container = document.getElementById(`nanny-container-${id}`);
+                if (container) {
+                    container.className = 'nanny-month';
+                }
+            });
+            
+            if (summerEnabled) {
+                let summerIds = [];
+                if (summerMonths === 'jul') summerIds = ['jul'];
+                else if (summerMonths === 'aug') summerIds = ['aug'];
+                else if (summerMonths === 'jul-aug') summerIds = ['jul', 'aug'];
+                else if (summerMonths === 'jun-jul') summerIds = ['jun', 'jul'];
+                else if (summerMonths === 'jun-aug') summerIds = ['jun', 'jul', 'aug'];
+                
+                summerIds.forEach(id => {
+                    const container = document.getElementById(`nanny-container-${id}`);
+                    if (container) {
+                        container.className = 'nanny-month summer-program';
+                    }
+                });
+            }
+        }
+        
+        document.getElementById('summerMonths').addEventListener('change', function() {
+            updateNannyGridForSummer();
+            updateAll();
+        });
+        
+        function resetNannyDays() {
+            monthIds.forEach(id => {
+                document.getElementById(`nanny-${id}`).value = 0;
+            });
+            updateAll();
+        }
+        
+        function getNannyDays() {
+            return monthIds.map(id => parseInt(document.getElementById(`nanny-${id}`).value) || 0);
+        }
+        
+        function getSummerMonthIndices() {
+            const summerEnabled = document.getElementById('summerEnabled').checked;
+            if (!summerEnabled) return [];
+            
+            const summerMonths = document.getElementById('summerMonths').value;
+            if (summerMonths === 'jul') return [10];
+            if (summerMonths === 'aug') return [11];
+            if (summerMonths === 'jul-aug') return [10, 11];
+            if (summerMonths === 'jun-jul') return [9, 10];
+            if (summerMonths === 'jun-aug') return [9, 10, 11];
+            return [];
+        }
+        
+        function getExtendedDayCost(days) {
+            if (days === 0) return 0;
+            return parseFloat(document.getElementById(`rate-extended${days}`).value) || 0;
+        }
+        
+        function getLifeProjectCost(days) {
+            if (days === 0) return 0;
+            return parseFloat(document.getElementById(`rate-life${days}`).value) || 0;
+        }
+        
+        function formatCurrency(value) {
+            return '$' + value.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        }
+        
+        function calculateCosts() {
+            const schoolName = document.getElementById('schoolName').value || 'Your School';
+            const schoolMonths = parseInt(document.getElementById('schoolMonths').value) || 10;
+            const extendedDays = parseInt(document.getElementById('extendedDays').value);
+            const lifeProjectDays = parseInt(document.getElementById('lifeProjectDays').value);
+            const nannyRate = parseFloat(document.getElementById('nannyRate').value) || 0;
+            const nannyHours = parseFloat(document.getElementById('nannyHours').value) || 0;
+            const dailyNannyCost = nannyRate * nannyHours;
+            const nannyDays = getNannyDays();
+            
+            const summerEnabled = document.getElementById('summerEnabled').checked;
+            const summerMonthIndices = getSummerMonthIndices();
+            let summerMonthlyRate = parseFloat(document.getElementById('summerRate').value) || 0;
+            
+            // Get annual costs
+            const regularCost = parseFloat(document.getElementById('rate-regular').value) || 0;
+            const addonsCost = parseFloat(document.getElementById('rate-addons').value) || 0;
+            const extendedCost = getExtendedDayCost(extendedDays);
+            const lifeProjectCost = getLifeProjectCost(lifeProjectDays);
+            
+            // Calculate monthly school tuition
+            const annualSchoolTuition = regularCost + addonsCost + extendedCost + lifeProjectCost;
+            const monthlySchoolTuition = schoolMonths > 0 ? annualSchoolTuition / schoolMonths : 0;
+            
+            // If summer rate is 0, use same as school year
+            if (summerEnabled && summerMonthlyRate === 0) {
+                summerMonthlyRate = monthlySchoolTuition;
+            }
+            
+            // Determine which months are school year vs summer vs no school
+            const schoolYearIndices = [];
+            for (let i = 0; i < 12; i++) {
+                if (i < schoolMonths && !summerMonthIndices.includes(i)) {
+                    schoolYearIndices.push(i);
+                }
+            }
+            
+            // Adjust: School year is typically Sept-June (indices 0-9)
+            // Summer can override some of those
+            // Remaining months are "no school"
+            
+            // Build monthly data
+            const monthlyData = months.map((month, i) => {
+                let tuition = 0;
+                let type = '';
+                
+                if (summerMonthIndices.includes(i)) {
+                    tuition = summerMonthlyRate;
+                    type = 'Summer Program';
+                } else if (i < schoolMonths) {
+                    tuition = monthlySchoolTuition;
+                    type = 'School Year';
+                } else {
+                    tuition = 0;
+                    type = 'No School';
+                }
+                
+                const nannyCost = nannyDays[i] * dailyNannyCost;
+                
+                return {
+                    month,
+                    type,
+                    tuition,
+                    nannyDays: nannyDays[i],
+                    nannyCost,
+                    total: tuition + nannyCost
+                };
+            });
+            
+            // Calculate cumulative
+            let cumulative = 0;
+            monthlyData.forEach(m => {
+                cumulative += m.total;
+                m.cumulative = cumulative;
+            });
+            
+            // Calculate totals
+            const totalSchoolTuition = regularCost;
+            const totalAddons = addonsCost;
+            const totalExtended = extendedCost;
+            const totalLifeProject = lifeProjectCost;
+            const totalSummer = summerMonthIndices.length * summerMonthlyRate;
+            const totalNannyDays = nannyDays.reduce((a, b) => a + b, 0);
+            const totalNannyCost = totalNannyDays * dailyNannyCost;
+            const annualTotal = annualSchoolTuition + totalSummer + totalNannyCost;
+            
+            return {
+                schoolName,
+                monthlyData,
+                totalSchoolTuition,
+                totalAddons,
+                totalExtended,
+                totalLifeProject,
+                totalSummer,
+                totalNannyCost,
+                totalNannyDays,
+                annualTotal,
+                monthlyAvg: annualTotal / 12,
+                dailyNannyCost,
+                lifeProjectDays,
+                extendedDays,
+                summerEnabled,
+                summerMonthIndices
+            };
+        }
+        
+        function updateAll() {
+            const nannyRate = parseFloat(document.getElementById('nannyRate').value) || 0;
+            const nannyHours = parseFloat(document.getElementById('nannyHours').value) || 0;
+            document.getElementById('dailyNannyCost').textContent = formatCurrency(nannyRate * nannyHours);
+            
+            // Update summer options visibility
+            document.getElementById('summerOptions').style.display = 
+                document.getElementById('summerEnabled').checked ? 'block' : 'none';
+            updateNannyGridForSummer();
+            
+            const data = calculateCosts();
+            
+            // Update summary card
+            const schoolName = document.getElementById('schoolName').value;
+            document.getElementById('summarySchoolName').textContent = 
+                schoolName ? `${schoolName} — Total Annual Cost` : 'Total Annual Childcare Cost';
+            document.getElementById('summaryTotal').textContent = formatCurrency(data.annualTotal);
+            document.getElementById('summarySub').textContent = formatCurrency(data.monthlyAvg) + '/month average';
+            document.getElementById('breakdownTuition').textContent = formatCurrency(data.totalSchoolTuition);
+            document.getElementById('breakdownAddons').textContent = formatCurrency(data.totalAddons);
+            document.getElementById('breakdownExtended').textContent = formatCurrency(data.totalExtended);
+            document.getElementById('breakdownLife').textContent = formatCurrency(data.totalLifeProject);
+            document.getElementById('breakdownSummer').textContent = formatCurrency(data.totalSummer);
+            document.getElementById('breakdownNanny').textContent = formatCurrency(data.totalNannyCost);
+            
+            // Update charts
+            updateCharts(data);
+            
+            // Update table
+            updateTable(data);
+            
+            // Update insights
+            updateInsights(data);
+        }
+        
+        function updateCharts(data) {
+            // Monthly Chart
+            monthlyChart.data.datasets[0].data = data.monthlyData.map(m => m.total);
+            monthlyChart.data.datasets[0].backgroundColor = data.monthlyData.map((m, i) => {
+                if (data.summerMonthIndices.includes(i)) return '#60a5fa';
+                if (m.type === 'No School') return '#f87171';
+                return '#3b82f6';
+            });
+            monthlyChart.update();
+            
+            // Composition Chart
+            compositionChart.data.datasets[0].data = data.monthlyData.map(m => m.tuition);
+            compositionChart.data.datasets[1].data = data.monthlyData.map(m => m.nannyCost);
+            compositionChart.update();
+            
+            // Cumulative Chart
+            cumulativeChart.data.datasets[0].data = data.monthlyData.map(m => m.cumulative);
+            cumulativeChart.update();
+        }
+        
+        function updateTable(data) {
+            const tbody = document.getElementById('dataTable');
+            tbody.innerHTML = '';
+            
+            let totalTuition = 0, totalNannyDays = 0, totalNannyCost = 0;
+            
+            data.monthlyData.forEach((m, i) => {
+                totalTuition += m.tuition;
+                totalNannyDays += m.nannyDays;
+                totalNannyCost += m.nannyCost;
+                
+                const row = document.createElement('tr');
+                if (data.summerMonthIndices.includes(i)) row.className = 'summer-row';
+                
+                const badge = data.summerMonthIndices.includes(i) ? '<span class="summer-badge">SUMMER</span>' : '';
+                
+                row.innerHTML = `
+                    <td>${m.month}${badge}</td>
+                    <td>${m.type}</td>
+                    <td>$${m.tuition.toFixed(2)}</td>
+                    <td>${m.nannyDays}</td>
+                    <td>$${m.nannyCost.toFixed(2)}</td>
+                    <td><strong>$${m.total.toFixed(2)}</strong></td>
+                    <td>$${m.cumulative.toFixed(2)}</td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            const totalRow = document.createElement('tr');
+            totalRow.className = 'total-row';
+            totalRow.innerHTML = `
+                <td>TOTAL</td>
+                <td>—</td>
+                <td>$${totalTuition.toFixed(2)}</td>
+                <td>${totalNannyDays}</td>
+                <td>$${totalNannyCost.toFixed(2)}</td>
+                <td><strong>${formatCurrency(data.annualTotal)}</strong></td>
+                <td>—</td>
+            `;
+            tbody.appendChild(totalRow);
+        }
+        
+        function updateInsights(data) {
+            // Monthly average
+            document.getElementById('insight-average').innerHTML = 
+                `You'll spend approximately <span class="highlight-blue">${formatCurrency(data.monthlyAvg)}/month</span> on average over 12 months.`;
+            
+            // School vs backup split
+            const schoolTotal = data.totalSchoolTuition + data.totalExtended + data.totalLifeProject + data.totalSummer;
+            const schoolPct = data.annualTotal > 0 ? Math.round((schoolTotal / data.annualTotal) * 100) : 0;
+            const nannyPct = 100 - schoolPct;
+            document.getElementById('insight-split').innerHTML = 
+                `<span class="highlight-green">${schoolPct}%</span> school programs / <span class="highlight-red">${nannyPct}%</span> backup care`;
+            
+            // Backup care burden
+            if (data.totalNannyDays > 0) {
+                document.getElementById('insight-nanny').innerHTML = 
+                    `${data.totalNannyDays} backup care days = <span class="highlight-red">${formatCurrency(data.totalNannyCost)}</span> annually`;
+            } else {
+                document.getElementById('insight-nanny').innerHTML = 
+                    `No backup care days configured. Add closure days in the "Backup Care" tab.`;
+            }
+            
+            // Peak month
+            let peakMonth = data.monthlyData[0];
+            data.monthlyData.forEach(m => {
+                if (m.total > peakMonth.total) peakMonth = m;
+            });
+            if (peakMonth.total > 0) {
+                document.getElementById('insight-peak').innerHTML = 
+                    `<span class="highlight-amber">${peakMonth.month}</span> at ${formatCurrency(peakMonth.total)} (${peakMonth.type}${peakMonth.nannyDays > 0 ? ' + ' + peakMonth.nannyDays + ' backup days' : ''})`;
+            } else {
+                document.getElementById('insight-peak').innerHTML = 
+                    `Enter your rates to see peak month analysis.`;
+            }
+        }
+        
+        // Initialize charts
+        function initCharts() {
+            monthlyChart = new Chart(document.getElementById('monthlyChart'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Monthly Total',
+                        data: [],
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '$' + (v/1000).toFixed(1) + 'k' }
+                        }
+                    }
+                }
+            });
+            
+            compositionChart = new Chart(document.getElementById('compositionChart'), {
+                type: 'bar',
+                data: {
+                    labels: months,
+                    datasets: [
+                        { label: 'Tuition / Programs', data: [], backgroundColor: '#3b82f6' },
+                        { label: 'Backup Care', data: [], backgroundColor: '#f87171' }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'top' } },
+                    scales: {
+                        x: { stacked: true },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            ticks: { callback: v => '$' + (v/1000).toFixed(1) + 'k' }
+                        }
+                    }
+                }
+            });
+            
+            cumulativeChart = new Chart(document.getElementById('cumulativeChart'), {
+                type: 'line',
+                data: {
+                    labels: months,
+                    datasets: [{
+                        label: 'Cumulative Spend',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59,130,246,0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { callback: v => '$' + (v/1000).toFixed(0) + 'k' }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Export/Print function
+        function exportPDF() {
+            const data = calculateCosts();
+            const schoolName = document.getElementById('schoolName').value || 'Childcare';
+            const extendedDays = document.getElementById('extendedDays').value;
+            const lifeProjectDays = document.getElementById('lifeProjectDays').value;
+            const nannyRate = document.getElementById('nannyRate').value;
+            const nannyHours = document.getElementById('nannyHours').value;
+            const summerEnabled = document.getElementById('summerEnabled').checked;
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            
+            // Update print header
+            document.getElementById('printTitle').textContent = `🧒 ${schoolName} Cost Analysis`;
+            document.getElementById('printSubtitle').textContent = 'Annual Childcare Cost Breakdown';
+            
+            // Update print config summary
+            let configHTML = `<strong>Configuration:</strong> `;
+            configHTML += `Extended Day: <strong>${extendedDays} days/week</strong> | `;
+            configHTML += `Late Afternoon: <strong>${lifeProjectDays} days/week</strong> | `;
+            configHTML += `Backup Care: <strong>$${nannyRate}/hr × ${nannyHours} hrs = $${nannyRate * nannyHours}/day</strong> | `;
+            configHTML += `Summer Program: <strong>${summerEnabled ? 'Yes' : 'No'}</strong> | `;
+            configHTML += `Generated: ${today}`;
+            
+            document.getElementById('printConfig').innerHTML = configHTML;
+            
+            // Trigger print dialog
+            window.print();
+        }
+        
+        // Load Eliot-Pearson Children's School preset
+        function loadEPCS() {
+            const room = document.getElementById('epcsRoom').value;
+            
+            if (!room) {
+                alert('Please select a room first!');
+                return;
+            }
+            
+            // Room configurations for Eliot-Pearson Children's School 2026-2027
+            const roomConfigs = {
+                rainbow: {
+                    name: 'Rainbow Room',
+                    ages: '2 yrs 9 mo – 3 yrs',
+                    schedule: 'M-F 8:30am-12:30pm',
+                    regular: 10967.74,
+                    extended: { 2: 4478.50, 3: 6717.75, 4: 8957.01, 5: 11196.26 },
+                    life: { 2: 1917.24, 3: 2875.85, 4: 3834.47, 5: 4790.97 },
+                    extendedHours: '12:30pm-4:00pm',
+                    isOrangeRoom: false
+                },
+                purple: {
+                    name: 'Purple Room',
+                    ages: '3 – 4 yrs',
+                    schedule: 'M-F 8:30am-12:30pm',
+                    regular: 10967.74,
+                    extended: { 2: 4478.50, 3: 6717.75, 4: 8957.01, 5: 11196.26 },
+                    life: { 2: 1917.24, 3: 2875.85, 4: 3834.47, 5: 4790.97 },
+                    extendedHours: '12:30pm-4:00pm',
+                    isOrangeRoom: false
+                },
+                green: {
+                    name: 'Green Room',
+                    ages: '4 – 5 yrs',
+                    schedule: 'M-F 8:30am-12:30pm',
+                    regular: 10967.74,
+                    extended: { 2: 4478.50, 3: 6717.75, 4: 8957.01, 5: 11196.26 },
+                    life: { 2: 1917.24, 3: 2875.85, 4: 3834.47, 5: 4790.97 },
+                    extendedHours: '12:30pm-4:00pm',
+                    isOrangeRoom: false
+                },
+                orange: {
+                    name: 'Orange Room',
+                    ages: '5 – 6 yrs',
+                    schedule: 'M/T/Th/F 8:30am-3:00pm, Wed 8:30am-12:30pm',
+                    regular: 17137.10,
+                    enrichment: 1599.45,
+                    extended: { 2: 1279.57, 3: 1919.36, 4: 2559.15, 5: 3198.93 },
+                    life: { 2: 1917.24, 3: 2875.85, 4: 3834.47, 5: 4790.97 },
+                    extendedHours: '3:00pm-4:00pm (1 hour only)',
+                    isOrangeRoom: true
+                }
+            };
+            
+            const config = roomConfigs[room];
+            
+            // School name with room
+            document.getElementById('schoolName').value = `Eliot-Pearson Children's School – ${config.name}`;
+            
+            // Base tuition
+            document.getElementById('rate-regular').value = config.regular;
+            document.getElementById('schoolMonths').value = 10;
+            
+            // Extended Day rates
+            document.getElementById('rate-extended5').value = config.extended[5];
+            document.getElementById('rate-extended4').value = config.extended[4];
+            document.getElementById('rate-extended3').value = config.extended[3];
+            document.getElementById('rate-extended2').value = config.extended[2];
+            
+            // Late Afternoon (Life Project) rates - same for all rooms
+            document.getElementById('rate-life5').value = config.life[5];
+            document.getElementById('rate-life4').value = config.life[4];
+            document.getElementById('rate-life3').value = config.life[3];
+            document.getElementById('rate-life2').value = config.life[2];
+            
+            // Program selections (default to full coverage)
+            document.getElementById('extendedDays').value = '5';
+            document.getElementById('lifeProjectDays').value = '5';
+            
+            // Summer Program (July)
+            document.getElementById('summerEnabled').checked = true;
+            document.getElementById('summerMonths').value = 'jul';
+            document.getElementById('summerRate').value = 0;
+            
+            // Nanny settings
+            document.getElementById('nannyRate').value = 25;
+            document.getElementById('nannyHours').value = 8;
+            
+            // School closure days (2025-2026 calendar)
+            // From the school calendar PDF:
+            // Oct: 2 (Oct 10 staff meeting, Oct 13 Indigenous Peoples' Day)
+            // Nov: 4 (Nov 11 Veterans Day, Nov 26-28 Thanksgiving)
+            // Dec: 10 (Dec 5 conferences, Dec 19 staff, Dec 22-31 winter break = 8 weekdays)
+            // Jan: 3 (Jan 1-2 winter break, Jan 19 MLK Day)
+            // Feb: 5 (Feb 16-20 President's Week)
+            // Mar: 1 (Mar 6 staff planning)
+            // Apr: 5 (Apr 20-24 Spring Break)
+            // May: 2 (May 1 conferences, May 25 Memorial Day)
+            // Jun: 6 (Jun 12 early dismissal + Jun 15-19 post-school before summer)
+            // Jul: 0 (Summer Program runs)
+            // Aug: 22 (no school until late Aug)
+            
+            const closureDays = {
+                'sep': 0,
+                'oct': 2,
+                'nov': 4,
+                'dec': 10,
+                'jan': 3,
+                'feb': 5,
+                'mar': 1,
+                'apr': 5,
+                'may': 2,
+                'jun': 6,
+                'jul': 0,
+                'aug': 22
+            };
+            
+            Object.keys(closureDays).forEach(month => {
+                document.getElementById(`nanny-${month}`).value = closureDays[month];
+            });
+            
+            // Update everything
+            updateAll();
+            
+            // Build confirmation message
+            let message = `✅ Eliot-Pearson ${config.name} loaded!\n\n`;
+            message += `📋 ROOM INFO:\n`;
+            message += `• Ages: ${config.ages}\n`;
+            message += `• Base Schedule: ${config.schedule}\n\n`;
+            message += `💰 RATES LOADED (2026-2027):\n`;
+            message += `• Regular Program: $${config.regular.toLocaleString()}/year\n`;
+            
+            if (config.isOrangeRoom) {
+                message += `• Extended Day (3-4pm): $${config.extended[5].toLocaleString()}/year for 5 days\n`;
+                message += `• Life Project (4-5:30pm): $${config.life[5].toLocaleString()}/year for 5 days\n\n`;
+                message += `⚠️ ORANGE ROOM NOTES:\n`;
+                message += `• Base program already runs until 3pm (M/T/Th/F)\n`;
+                message += `• Extended Day is only 1 hour (3-4pm) — rates are lower!\n`;
+                message += `• Wed Enrichment Program ($${config.enrichment.toLocaleString()}) not auto-added\n`;
+                message += `  → Add manually in "School & Rates" if you need Wed afternoon coverage\n`;
+            } else {
+                message += `• Extended Day (12:30-4pm): $${config.extended[5].toLocaleString()}/year for 5 days\n`;
+                message += `• Life Project (4-5:30pm): $${config.life[5].toLocaleString()}/year for 5 days\n`;
+            }
+            
+            message += `\n📅 Calendar: 2025-2026 closure days loaded\n`;
+            message += `☀️ Summer: July program enabled\n\n`;
+            message += `Adjust program days and backup care settings as needed!`;
+            
+            alert(message);
+        }
+        
+        // Initialize
+        initNannyGrid();
+        initCharts();
+        updateAll();
+    </script>
+</body>
+</html>
